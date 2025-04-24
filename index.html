@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat com Ollama</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+
+    #messages {
+      border: 1px solid #ddd;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      background: #fff;
+      border-radius: 5px;
+    }
+
+    .msg {
+      margin: 5px 0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      max-width: 80%;
+    }
+
+    .user {
+      background: #d1e7dd;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .bot {
+      background: #e2e3e5;
+      align-self: flex-start;
+      margin-right: auto;
+    }
+
+    #form {
+      display: flex;
+      gap: 10px;
+    }
+
+    #form input {
+      flex: 1;
+      padding: 10px;
+    }
+
+    #form button {
+      padding: 10px 15px;
+    }
+
+    #chat-box {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <h1>💬 Chat com Ollama</h1>
+  <div id="chat-box">
+    <div id="messages"></div>
+    <form id="form">
+      <input type="text" id="input" placeholder="Digite sua mensagem..." autocomplete="off" />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    const messages = document.getElementById('messages');
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+
+    const ws = new WebSocket("ws://localhost:3000/chat");
+
+    ws.onopen = () => {
+      appendMessage("✅ Conectado ao servidor WebSocket!", 'bot');
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const { message } = JSON.parse(event.data);
+        appendMessage(message?.content || '[Sem conteúdo da IA]', 'bot');
+      } catch (err) {
+        appendMessage("Erro ao processar resposta do servidor", 'bot');
+      }
+    };
+
+    ws.onclose = () => {
+      appendMessage("❌ Conexão encerrada.", 'bot');
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (text === "") return;
+
+      appendMessage(text, 'user');
+      ws.send(text);
+      input.value = "";
+    });
+
+    function appendMessage(text, role) {
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.innerText = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+</body>
+</html>
