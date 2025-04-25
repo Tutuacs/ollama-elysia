@@ -1,23 +1,22 @@
 import ollama, { ToolCall } from 'ollama';
 import { tools, toolsMap } from './tools';
 import { Message, Model, Tool } from './types';
-import { addTwoNumbersTool, addTwoNumbersToolType } from './tools/addNumbers';
 
 export class Ollama {
 
     public messages: Message[] = [];
     private systemMessage: Message = {
         role: 'system',
-        content: 'You are a helpful assistant, use the tools only if needed and it make sense!',
+        content: `You are a helpful assistant, when you get a message from 'tool' role its the result of some tool to help you. call the tool only if it makes sense`,
     };
 
     private model: Model;
     private tools: Tool[] = [];
-    private toolMap: Map<string, any> = new Map();
+    private toolMap;
 
     constructor() {
         this.messages = [];
-        this.model = 'llama3.1';
+        this.model = 'llama3.2';
         this.tools = tools;
         this.toolMap = toolsMap;
     }
@@ -54,49 +53,27 @@ export class Ollama {
         for (const toolCall of toolCalls) {
             const { name, arguments: args } = toolCall.function;
 
-            let toolArgs: any;
-            try {
-                toolArgs = await this.parseArgs(name, args);
-                if (toolArgs === undefined) {
-                    continue
-                }
-            } catch (error) {
+            const clss = this.toolMap.get(name);
+
+            if (!clss) {
+                console.error(`Tool ${name} not found`);
                 continue;
             }
 
-            const fn = this.toolMap.get(name);
-            if (fn) {
-                const result = await fn(toolArgs);
-                toolMessages.push({
-                    role: 'tool',
-                    content: JSON.stringify(result),
-                });
+            const arg = clss.validateArgs(args);
+
+            if (arg === undefined) {
+                continue
             }
+
+            const result = await clss.main(arg);
+            toolMessages.push({
+                role: 'tool',
+                content: JSON.stringify(result),
+            })
         }
 
         return toolMessages;
-    }
-
-    async parseArgs(name: string, args: { [key: string]: any }) {
-        let arg: { [key: string]: any } = {};
-
-        // put args in arg
-        for (const key in args) {
-            if (args.hasOwnProperty(key)) {
-                arg[key] = args[key];
-            }
-        }
-
-        // parse arg to the type of the addTwoNumbersTool
-        if (name === 'addTwoNumbers') {
-            const parsed = addTwoNumbersTool.safeParse(arg);
-            if (!parsed.success) {
-                return undefined;
-            }
-            return parsed.data as addTwoNumbersToolType;
-        }
-
-        return undefined;
     }
 
 }
