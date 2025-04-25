@@ -8,8 +8,9 @@
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
     "@elysiajs/swagger": "^1.2.2",
-    "elysia": "latest",
-    "ollama": "^0.5.15"
+    "elysia": "^1.2.25",
+    "ollama": "^0.5.15",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "bun-types": "latest"

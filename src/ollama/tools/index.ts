@@ -6,12 +6,12 @@ export const tools: Tool[] = [
         type: "function",
         function: {
             name: "addTwoNumbers",
-            description: "Usar quando o usuário pedir para somar dois números inteiros, você deve passar os dois números, a resposta será o resultado da soma.",
+            description: "NEVER call addTwoNumbers unless the user explicitly asks: “sum X and Y”.If not, respond normally and do not refer to any tool.",
             parameters: {
                 type: "object",
                 properties: {
-                    a: { type: "number", description: "Primeiro número" },
-                    b: { type: "number", description: "Segundo número" },
+                    a: { type: "number", description: "first value"},
+                    b: { type: "number", description: "second value"},
                 },
                 required: ["a", "b"],
             },
