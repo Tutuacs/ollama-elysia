@@ -5,10 +5,36 @@ import { Message, Model, Tool } from './types';
 export class Ollama {
 
     public messages: Message[] = [];
-    private systemMessage: Message = {
-        role: 'system',
-        content: `You are a helpful assistant, when you get a message from 'tool' role its the result of some tool to help you. call the tool only if it makes sense`,
-    };
+    private systemMessages: Message[] = [
+        {
+            role: 'system',
+            content: `Your name is Babdgi`,
+        },
+        {
+            role: 'system',
+            content: `You are a seller, you have to sell products to the user`,
+        },
+        {
+            role: 'system',
+            content: `You can consult the tools to get information about the products`,
+        },
+        {
+            role: 'system',
+            content: `When you recommend a product, you have to try sell other products related to the first one`,
+        },
+        // {
+        //     role: 'system',
+        //     content: `If you dont have tool related to the user question, dont call any tool.`,
+        // },
+        {
+            role: 'system',
+            content: `Dont mention if you need or dont tool calls.`,
+        },
+        {
+            role: 'system',
+            content: `the clientId of this client is: '1234567890'`,
+        },
+    ];
 
     private model: Model;
     private tools: Tool[] = [];
@@ -16,7 +42,7 @@ export class Ollama {
 
     constructor() {
         this.messages = [];
-        this.model = 'llama3.2';
+        this.model = 'mistral-nemo';
         this.tools = tools;
         this.toolMap = toolsMap;
     }
@@ -27,11 +53,12 @@ export class Ollama {
             this.messages.shift();
         }
 
-        const response = await ollama.chat({ model: this.model, messages: [this.systemMessage, ...this.messages], tools: this.tools });
+        const response = await ollama.chat({ model: this.model, messages: [...this.systemMessages, ...this.messages], tools: this.tools });
         // console.log('Response: ', response);
 
         if (response.message!.tool_calls && response.message!.tool_calls.length > 0) {
-            const mergedMessages = [this.systemMessage, ...this.messages];
+            console.log('Tool Calls')
+            const mergedMessages = [...this.systemMessages, ...this.messages];
             const toolResponses = await this.toolCall(response.message.tool_calls);
             if (toolResponses.length > 0) {
                 mergedMessages.push(...toolResponses);

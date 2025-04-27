@@ -16,7 +16,7 @@ export class addTwoNumbersClass {
             type: "function",
             function: {
                 name: "addTwoNumbers",
-                description: "NEVER call addTwoNumbers unless the user explicitly asks: “sum X and Y”.If not, respond normally and do not refer to any tool.",
+                description: "On this tool you can add two numbers and get the result of the sum. use only when the users need to sum something and get the result",
                 parameters: {
                     type: "object",
                     properties: {

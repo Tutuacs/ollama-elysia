@@ -16,4 +16,4 @@ export type Message = {
     content: string;
 }
 
-export type Model = 'llama3.2:1b' | 'llama3.2' | 'llama3.1'
+export type Model = 'llama3.2:1b' | 'llama3.2' | 'llama3.1' | 'mistral-nemo' | ``
